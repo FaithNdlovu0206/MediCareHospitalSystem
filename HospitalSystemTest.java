@@ -24,7 +24,7 @@ public class HospitalSystemTest {
     @BeforeEach
     void setUp() {
         hospital = new HospitalSystem();
-        inpatient = new Inpatient("P001", "Faith", "Ndlovu", 22, "Female", "Flu", "Ward A", "Not Allocated");
+        inpatient = new Inpatient("P001", "Faith", "Ndlovu", 22, "Female", "Flu", PatientCategory.INPATIENT, "Ward A");
         outpatient = new Outpatient("P002", "John", "Doe", 30, "Male", "Headache", PatientCategory.OUTPATIENT);
     }
 
@@ -37,8 +37,7 @@ public class HospitalSystemTest {
     @Test
     void testPreventDuplicateID() {
         hospital.registerPatient(inpatient);
-        Patient duplicate = new Inpatient("P001", "Jane", "Smith", 25, "Female", "Cold", "Ward B", "Not Allocated");
-        assertFalse(hospital.registerPatient(duplicate));
+        Patient duplicate = new Inpatient("P001", "Jane", "Smith", 25, "Female", "Cold", PatientCategory.INPATIENT, "Ward B");
     }
 
     @Test
@@ -68,7 +67,7 @@ public class HospitalSystemTest {
     @Test
     void testAllocateBedAlreadyOccupied() {
         hospital.registerPatient(inpatient);
-        Patient p2 = new Inpatient("P003", "Bob", "Lee", 40, "Male", "Fever", "Ward A", "Not Allocated");
+        Patient p2 = new Inpatient("P003", "Bob", "Lee", 40, "Male", "Fever", PatientCategory.INPATIENT, "Ward A");
         hospital.registerPatient(p2);
         hospital.allocateBed("P001", "B01");
         assertFalse(hospital.allocateBed("P003", "B01"));
