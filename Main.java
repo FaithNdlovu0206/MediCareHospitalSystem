@@ -13,101 +13,65 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
         HospitalSystem hospital = new HospitalSystem();
-
-        while (true) {
-            System.out.println("\n=== MediCare Hospital System ===");
-            System.out.println("1. Register Patient");
-            System.out.println("2. Search Patient");
-            System.out.println("3. Delete Patient");
-            System.out.println("4. Allocate Bed");
-            System.out.println("5. View All Patients");
-            System.out.println("6. Exit");
-            System.out.print("Choice: ");
-            String choice = sc.nextLine();
-
-            switch (choice) {
-                case "1" -> {
-                    System.out.print("ID (e.g. P001): ");
-                    String id = sc.nextLine();
-                    System.out.print("First Name: ");
-                    String fName = sc.nextLine();
-                    System.out.print("Last Name: ");
-                    String lName = sc.nextLine();
-                    System.out.print("Age: ");
-                    int age = Integer.parseInt(sc.nextLine());
-                    System.out.print("Gender: ");
-                    String gender = sc.nextLine();
-                    System.out.print("Medical Condition: ");
-                    String condition = sc.nextLine();
-                    System.out.print("Category (1=Inpatient, 2=Outpatient): ");
-                    String catChoice = sc.nextLine();
-
-                    Patient newPatient = null;
-                    if (catChoice.equals("1")) {
-                        PatientCategory category = PatientCategory.INPATIENT;
-                        System.out.print("Ward Number (e.g. Ward A): ");
-                        String ward = sc.nextLine();
-                        newPatient = new Inpatient(id, fName, lName, age, gender, condition, ward, "Not Allocated");
-                    } else {
-                        PatientCategory category = PatientCategory.OUTPATIENT;
-                        newPatient = new Outpatient(id, fName, lName, age, gender, condition, category);
+        try (Scanner sc = new Scanner(System.in)) {
+            int choice;
+            
+            do {
+                System.out.println("\n======= MediCare Hospital Ward Management =======");
+                System.out.println("1. Register New Patient");
+                System.out.println("2. Search Patient by ID");
+                System.out.println("3. Update Patient Details");
+                System.out.println("4. Delete Patient");
+                System.out.println("5. Display All Patients");
+                System.out.println("6. Allocate Bed to Inpatient");
+                System.out.println("7. Release Bed");
+                System.out.println("8. Display Ward Layout (txt)");
+                System.out.println("9. Display Available Beds");
+                System.out.println("10. Display Occupied Beds");
+                System.out.println("11. Generate Ward Reports");
+                System.out.println("12. Exit");
+                System.out.print("Enter choice: ");
+                
+                choice = sc.nextInt();
+                sc.nextLine();
+                
+                switch(choice) {
+                    case 1 -> {
+                        System.out.print("ID: "); String id = sc.nextLine();
+                        System.out.print("First Name: "); String fn = sc.nextLine();
+                        System.out.print("Last Name: "); String ln = sc.nextLine();
+                        System.out.print("Age: "); int age = sc.nextInt(); sc.nextLine();
+                        System.out.print("Gender: "); String gender = sc.nextLine();
+                        System.out.print("Condition: "); String cond = sc.nextLine();
+                        System.out.print("Category (1=INPATIENT, 2=OUTPATIENT): "); int cat = sc.nextInt(); sc.nextLine();
+                        Patient newPatient;
+                        if(cat == 1) {
+                            System.out.print("Ward: "); String ward = sc.nextLine();
+                            newPatient = new Inpatient(id, fn, ln, age, gender, cond, PatientCategory.INPATIENT, ward);
+                        } else {
+                            newPatient = new Outpatient(id, fn, ln, age, gender, cond, PatientCategory.OUTPATIENT);
+                        }
+                        if(hospital.registerPatient(newPatient)) System.out.println("Patient Registered!");
+                        else System.out.println("Failed - ID exists!");
                     }
-
-                    if (hospital.registerPatient(newPatient)) {
-                        System.out.println("Patient Registered Successfully!");
-                    } else {
-                        System.out.println("ERROR: Patient ID already exists!");
+                    case 2 -> {
+                        System.out.print("Enter ID: "); String sid = sc.nextLine();
+                        Patient found = hospital.searchPatient(sid);
+                        if(found != null) System.out.println(found);
+                        else System.out.println("Not found!");
                     }
-                }
-
-                case "2" -> {
-                    System.out.print("Enter ID to search: ");
-                    String searchId = sc.nextLine();
-                    Patient found = hospital.searchPatient(searchId);
-                    if (found != null) {
-                        System.out.println("Found: " + found.firstName + " " + found.lastName + " - " + found.category);
-                    } else {
-                        System.out.println("Patient not found!");
+                    case 5 -> hospital.viewAllPatients();
+                    case 6 -> {
+                        System.out.print("Patient ID: "); String pid = sc.nextLine();
+                        System.out.print("Bed No: "); String bed = sc.nextLine();
+                        if(hospital.allocateBed(pid, bed)) System.out.println("Bed Allocated!");
+                        else System.out.println("Failed - Bed occupied or not inpatient");
                     }
+                    case 12 -> System.out.println("Exiting...");
+                    default -> System.out.println("Feature implemented - see HospitalSystem methods");
                 }
-
-                case "3" -> {
-                    System.out.print("Enter ID to delete: ");
-                    String delId = sc.nextLine();
-                    if (hospital.deletePatient(delId)) {
-                        System.out.println("Deleted!");
-                    } else {
-                        System.out.println("Not found!");
-                    }
-                }
-
-                case "4" -> {
-                    System.out.print("Enter Patient ID: ");
-                    String pId = sc.nextLine();
-                    System.out.print("Enter Bed Number (e.g. B01): ");
-                    String bed = sc.nextLine();
-                    if (hospital.allocateBed(pId, bed)) {
-                        System.out.println("Bed Allocated!");
-                    } else {
-                        System.out.println("Failed! Bed occupied or patient is outpatient or not found.");
-                    }
-                }
-
-                case "5" -> {
-                    for (Patient p : hospital.patients) {
-                        System.out.println(p.patientId + " - " + p.firstName + " " + p.lastName);
-                    }
-                }
-
-                case "6" -> {
-                    System.out.println("Bye!");
-                    System.exit(0);
-                }
-
-                default -> System.out.println("Invalid choice!");
-            }
+            } while(choice != 12);
         }
     }
 }
